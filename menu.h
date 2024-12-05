@@ -1,3 +1,6 @@
 #pragma once
 
-void showMenu();
+#include <stdbool.h>
+
+int showMenu();
+int showDeathMenu();

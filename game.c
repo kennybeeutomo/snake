@@ -12,7 +12,6 @@
 void startGame(Game* game, unsigned seed) {
 	if (seed == 0) seed = time(NULL);
 	srand(seed);
-	setvbuf(stdout, NULL, _IOFBF, 4096);
 	printf(CLEARSCREEN);
 	game->score = 0;
 	game->steps = 0;
