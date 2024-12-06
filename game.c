@@ -2,31 +2,46 @@
 #include "ansicodes.h"
 #include "map.h"
 #include "snake.h"
+#include "utils.h"
 
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <time.h>
 #include <conio.h>
 
+Game initGame(Map* map, Snake* snake) {
+	Game game;
+	game.map = map;
+	game.snake = snake;
+	game.running = false;
+	return game;
+}
+
 void startGame(Game* game, unsigned seed) {
-	if (seed == 0) seed = time(NULL);
+	if (seed == 0) {
+		srand(time(NULL));
+		seed = (rand() * rand()) % 1000000;
+	}
 	srand(seed);
-	printf(CLEARSCREEN);
+
+	game->seed = seed;
 	game->score = 0;
 	game->steps = 0;
+
 	runGame(game);
 }
 
 void runGame(Game* game) {
 	game->running = true;
+
 	mapSnake(game);
+	generateWalls(game, 30, 8, 20);
+
 	while (game->running) {
 		if (game->steps % 10 == 0) {
-			addFood(game);
-			addSpike(game, 3);
-			addSpike(game, 3);
-			addSpike(game, 3);
+			addFoods(game, 1);
 		}
 		displayMap(game->map);
 		displayStats(game);
@@ -34,12 +49,14 @@ void runGame(Game* game) {
 		mapSnake(game);
 		game->steps++;
 	}
+
 	endGame(game);
 }
 
 void endGame(Game* game) {
 	freeMap(game->map);
 	freeSnake(game->snake);
+
 	printf(CLEARSCREEN);
 	printf(HOME);
 	fflush(stdout);
@@ -50,29 +67,17 @@ void getInput(Game* game) {
 	do {
 		invalid = false;
 		switch (getch()) {
-			case 'h':
-				if (game->snake->direction != right)
-					moveSnakeOnMap(game, left);
-				else
-					invalid = true;
+			case 'h': case 'a':
+				invalid = moveSnakeOnMap(game, left);
 				break;
-			case 'j':
-				if (game->snake->direction != up)
-					moveSnakeOnMap(game, down);
-				else
-					invalid = true;
+			case 'j': case 's':
+				invalid = moveSnakeOnMap(game, down);
 				break;
-			case 'k':
-				if (game->snake->direction != down)
-					moveSnakeOnMap(game, up);
-				else
-					invalid = true;
+			case 'k': case 'w':
+				invalid = moveSnakeOnMap(game, up);
 				break;
-			case 'l':
-				if (game->snake->direction != left)
-					moveSnakeOnMap(game, right);
-				else
-					invalid = true;
+			case 'l': case 'd':
+				invalid = moveSnakeOnMap(game, right);
 				break;
 			case 'q':
 				game->running = false;
@@ -84,83 +89,71 @@ void getInput(Game* game) {
 	} while (invalid);
 }
 
-char charAtDirection(Game* game, Direction direction) {
-	int x = game->snake->x;
-	int y = game->snake->y;
-	switch (direction) {
-		case right: x++; break;
-		case down: y++; break;
-		case left: x--; break;
-		case up: y--; break;
-	}
-	if (isInside(game->map, x, y)) {
-		return game->map->data[y][x];
-	} else {
-		return 0;
-	}
-}
-
-void moveSnakeOnMap(Game* game, Direction direction) {
-	switch (charAtDirection(game, direction)) {
+void handleSnakeCollision(Game* game) {
+	switch (mapGetChar(game->map, game->snake->x, game->snake->y)) {
 		case '*':
 			game->score++;
 			extendSnake(game->snake);
 			break;
-		case 0:
-		case '#':
-		case ' ':
+		case 0: case '#': case ' ':
 			game->running = false;
-			return;
 	}
+}
+
+int moveSnakeOnMap(Game* game, Direction direction) {
+	if ((direction + 2) % 4 == game->snake->direction) return 1;
 	moveSnake(game->snake, direction);
+	handleSnakeCollision(game);
+	return 0;
 }
 
 void mapSnake(Game* game) {
-	int i = game->snake->length-1;
-	int x = game->snake->segments[i].x;
-	int y = game->snake->segments[i].y;
-	game->map->data[y][x] = '.';
-	for (i--; i > 0; --i) {
-		x = game->snake->segments[i].x;
-		y = game->snake->segments[i].y;
-		game->map->data[y][x] = '#';
+	Segment* sg;
+	for (int i = 0; i < game->snake->length; ++i) {
+		sg = &game->snake->segments[i];
+		mapSetChar(game->map, sg->x, sg->y, sg->type);
 	}
-	x = game->snake->segments[i].x;
-	y = game->snake->segments[i].y;
-	game->map->data[y][x] = '@';
 }
 
-void addFood(Game* game) {
-	int x, y;
-	do {
-		x = rand() % game->map->width;
-		y = rand() % game->map->height;
-	} while (game->map->data[y][x] != '.');
-
-	game->map->data[y][x] = '*';
+void addFoods(Game* game, int quantity) {
+	for (int q = 0; q < quantity; ++q) {
+		int x, y;
+		if (mapRandomCharPos(game->map, &x, &y, ".")) return;
+		mapSetChar(game->map, x, y, '*');
+	}
 }
 
-void addSpike(Game* game, int length) {
-	int x, y;
-	do {
-		x = rand() % game->map->width;
-		y = rand() % game->map->height;
-	} while (game->map->data[y][x] != '.');
+void generateWalls(Game* game, int quantity, int length, int turnChance) {
+	for (int q = 0; q < quantity; ++q) {
+		int x, y;
+		mapRandomCharPos(game->map, &x, &y, ".");
+		Direction direction = rand() % 4;
 
-	int* p = (rand() % 2)?&x:&y;
-	for (int i = 0; i < length; ++i) {
-		(*p)++;
-		if (isInside(game->map, x, y)) {
-			if (game->map->data[y][x] == '.') {
-				game->map->data[y][x] = ' ';
+		for (int l = 0; l < length; ++l) {
+			mapReplaceChar(game->map, x, y, ' ', ".");
+
+			switch (direction) {
+				case right: x++; break;
+				case down: y++; break;
+				case left: x--; break;
+				case up: y--; break;
+			}
+
+			if ((rand() % 100) < turnChance) {
+				direction = rand() % 2 ?
+					mod(direction + 1, 4) :
+					mod(direction - 1, 4);
 			}
 		}
 	}
 }
 
 void displayStats(Game* game) {
-	printf("Score: %d\n", game->score);
-	printf("Steps: %d\n", game->steps);
+	printf("Score : %d\n", game->score);
+	printf("Steps : %d\n", game->steps);
+	printf("Seed  : %u\n", game->seed);
+	printf("Snake : %d ", game->snake->length);
+	printSnake(game->snake);
 	fflush(stdout);
 }
 

@@ -3,6 +3,9 @@
 #define CLEARSCREEN "\033[2J"
 #define HOME		"\033[H"
 
+#define CUR_INV		"\033[?25l"
+#define CUR_VIS		"\033[?25h"
+
 #define BLACKFG		"\033[30m"
 #define REDFG		"\033[31m"
 #define GREENFG		"\033[32m"

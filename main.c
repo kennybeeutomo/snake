@@ -5,24 +5,25 @@
 #include <string.h>
 #include <time.h>
 
+#include "ansicodes.h"
 #include "game.h"
 #include "snake.h"
 #include "menu.h"
 
 int main() {
+	printf(CUR_INV);
 	setvbuf(stdout, NULL, _IOFBF, 4096);
 
-	bool running = true;
-
-	running = showMenu();
+	bool running = showMenu() == 0;
 	while (running) {
 		Map map = initMap(30, 20);
-		Snake snake = initSnake(6, 10, 10);
-		Game game = {&map, &snake};
-		startGame(&game, 1);
-		running = showDeathMenu();
+		Snake snake = initSnake(3, 10, 10);
+		Game game = initGame(&map, &snake);
+		startGame(&game, 0);
+		running = showDeathMenu() == 0;
 	}
 
+	printf(CUR_VIS);
 	return 0;
 }
 

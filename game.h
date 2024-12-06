@@ -11,8 +11,10 @@ typedef struct {
 	bool running;
 	int score;
 	int steps;
+	unsigned seed;
 } Game;
 
+Game initGame(Map* map, Snake* snake);
 void startGame(Game* game, unsigned seed);
 void runGame(Game* game);
 void endGame(Game* game);
@@ -20,9 +22,9 @@ void endGame(Game* game);
 void getInput(Game* game);
 
 void mapSnake(Game* game);
-void moveSnakeOnMap(Game* game, Direction direction);
+int moveSnakeOnMap(Game* game, Direction direction);
 
-void addFood(Game* game);
-void addSpike(Game* game, int length);
+void addFoods(Game* game, int quantity);
+void generateWalls(Game* game, int quantity, int length, int turnChance);
 
 void displayStats(Game* game);

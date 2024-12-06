@@ -4,63 +4,66 @@
 #include "snake.h"
 
 Snake initSnake(int length, int x, int y) {
-	Segment* segments = (Segment*)malloc((length) * sizeof(Segment));
+	if (length <= 1) length = 2;
 
-	for (int i = length-1; i > 0; --i) {
-		segments[i] = (Segment){x++, y, &segments[i-1]};
+	int capacity = 1024;
+	Segment* segments = (Segment*)malloc(capacity * sizeof(Segment));
+
+	int i = length-1;
+	segments[i] = (Segment){x++, y, '.', &segments[i-1]};
+
+	for (i--; i > 0; --i) {
+		segments[i] = (Segment){x++, y, '#', &segments[i-1]};
 	}
-	segments[0] = (Segment){x, y, NULL};
 
-	Snake snake = {x, y, segments, right, length};
+	segments[0] = (Segment){x, y, '@', NULL};
+
+	Snake snake = {x, y, segments, right, length, capacity};
 
 	return snake;
 }
 
 void moveSnake(Snake* snake, Direction direction) {
-	for (int i = snake->length-1; i > 0; --i) {
-		snake->segments[i].x = snake->segments[i].next->x;
-		snake->segments[i].y = snake->segments[i].next->y;
+	Segment* sg;
+	for (sg = &snake->segments[snake->length-1]; sg->next != NULL; --sg) {
+		sg->x = sg->next->x;
+		sg->y = sg->next->y;
 	}
 
 	switch (direction) {
-		case right:
-			snake->x++;
-			break;
-		case down:
-			snake->y++;
-			break;
-		case left:
-			snake->x--;
-			break;
-		case up:
-			snake->y--;
-			break;
-		default:
-			break;
+		case right: snake->x++; break;
+		case down: snake->y++; break;
+		case left: snake->x--; break;
+		case up: snake->y--; break;
 	}
 
-	snake->segments[0].x = snake->x;
-	snake->segments[0].y = snake->y;
+	sg->x = snake->x;
+	sg->y = snake->y;
 	snake->direction = direction;
 }
 
 void extendSnake(Snake* snake) {
-	snake->segments = (Segment*)realloc(snake->segments, (++snake->length) * sizeof(Segment));
-	Segment* lastSegment = &snake->segments[snake->length-1];
-	*lastSegment = (Segment){(lastSegment-1)->x, (lastSegment-1)->y, lastSegment-1};
-}
+	snake->length++;
 
-void printSnake(Snake* snake) {
-	printf("Snake %p:\n", snake);
-	printf("At (%d,%d), %d long\n", snake->x, snake->y, snake->length);
-	for (int i = snake->length-1; i > 0; --i) {
-		printf("Segment %d (%p) at (%d,%d) -> %p\n", i, &snake->segments[i],
-		 snake->segments[i].x, snake->segments[i].y, snake->segments[i].next);
+	if (snake->length >= snake->capacity) {
+		snake->capacity *= 2;
+		Segment* newSegments = realloc(snake->segments, snake->capacity * sizeof(Segment));
+		snake->segments = newSegments;
 	}
-	printf("Head %p at (%d,%d) -> %p\n", &snake->segments[0],
-		snake->segments[0].x, snake->segments[0].y, snake->segments[0].next);
+
+	Segment* lastSegment = &snake->segments[snake->length-1];
+	*lastSegment = *(lastSegment-1);
+	lastSegment->type = '.';
+	lastSegment->next = lastSegment-1;
+	(lastSegment-1)->type = '#';
 }
 
 void freeSnake(Snake* snake) {
 	free(snake->segments);
+}
+
+void printSnake(Snake* snake) {
+	for (int i = 0; i < snake->length; ++i) {
+		printf("%c", snake->segments[i].type);
+	}
 }

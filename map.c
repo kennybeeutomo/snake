@@ -56,3 +56,43 @@ bool isInside(Map* map, int x, int y) {
 	return x >= 0 && x < map->width && y >= 0 && y < map->height;
 }
 
+int mapSetChar(Map* map, int x, int y, char ch) {
+	if (isInside(map, x, y)) {
+		map->data[y][x] = ch;
+		return 0;
+	} else {
+		return 1;
+	}
+}
+
+int mapReplaceChar(Map* map, int x, int y, char ch, const char* charList) {
+	char c = mapGetChar(map, x, y);
+	if (strchr(charList, c) != NULL && c != 0) {
+		map->data[y][x] = ch;
+		return 0;
+	} else {
+		return 1;
+	}
+}
+
+char mapGetChar(Map* map, int x, int y) {
+	if (isInside(map, x, y)) {
+		return map->data[y][x];
+	} else {
+		return 0;
+	}
+}
+
+int mapRandomCharPos(Map* map, int* x, int* y, const char* chars) {
+	int newX, newY, i = 0;
+
+	do {
+		newX = rand() % map->width;
+		newY = rand() % map->height;
+		if (i++ >= map->width * map->height) return 1;
+	} while (strchr(chars, mapGetChar(map, newX, newY)) == NULL);
+
+	*x = newX;
+	*y = newY;
+	return 0;
+}

@@ -6,6 +6,7 @@ typedef struct Segment Segment;
 typedef struct Segment {
 	int x;
 	int y;
+	char type;
 	Segment* next;
 } Segment;
 
@@ -14,7 +15,8 @@ typedef struct {
 	int y;
 	Segment* segments;
 	Direction direction;
-	int length; // minimal 6
+	int length;
+	int capacity;
 } Snake;
 
 Snake initSnake(int length, int x, int y);

@@ -5,10 +5,10 @@
 #include "menu.h"
 #include "ansicodes.h"
 #include "map.h"
+#include "utils.h"
 
 int showMenu() {
     int choice = 0;
-    char key;
     while (1) {
 		printf(CLEARSCREEN);
 		printf(HOME);
@@ -30,24 +30,24 @@ int showMenu() {
         printf("Use 'w' or 's' keys to navigate.\n");
 		fflush(stdout);
 
-        key = getch(); 
-        if (key == 'w') {  
-            choice = 0;
-        } else if (key == 's') { 
-            choice = 1;
-        } else if (key == 13) { 
-            if (choice == 0) {
-				return 1;
-            } else if (choice == 1) {
-				return 0;
-            }
-        }
+		switch (getch()) {
+			case 'k':
+			case 'w':
+				choice = mod(choice-1, 2);
+				break;
+			case 'j':
+			case 's':
+				choice = mod(choice+1, 2);
+				break;
+			case ' ':
+			case 13:
+				return choice;
+		}
     }
 }
 
 int showDeathMenu() {
     int choice = 0;
-    char key;
     while (1) {
 		printf(CLEARSCREEN);
 		printf(HOME);
@@ -68,19 +68,19 @@ int showDeathMenu() {
         printf("Use 'w' or 's' keys to navigate.\n");
 		fflush(stdout);
 
-        key = getch();
-        if (key == 'w') {
-            choice = 0;
-        } else if (key == 's') {
-            choice = 1;
-        } else if (key == 13) {
-            if (choice == 0) {
-				return 1;
-            } else if (choice == 1) {
-                // showLeaderboard();
-                return 0; 
-            }
-        }
+		switch (getch()) {
+			case 'k':
+			case 'w':
+				choice = mod(choice-1, 2);
+				break;
+			case 'j':
+			case 's':
+				choice = mod(choice+1, 2);
+				break;
+			case ' ':
+			case 13:
+				return choice;
+		}
     }
 }
 

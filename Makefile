@@ -3,7 +3,7 @@ EXE = $(NAME).exe
 TARGET = ./$(EXE)
 
 CC = gcc
-CFLAGS = -Wall -std=c11
+CFLAGS = -Wall -Wextra -std=c11
 LDLIBS = 
 
 CFILES = $(wildcard *.c)

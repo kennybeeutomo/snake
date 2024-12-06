@@ -13,6 +13,7 @@ void displayMap(Map* map);
 void freeMap(Map* map);
 bool isInside(Map* map, int x, int y);
 
-void clearScreen();
-void home();
-void reset();
+int mapSetChar(Map* map, int x, int y, char ch);
+int mapReplaceChar(Map* map, int x, int y, char ch, const char* charList);
+char mapGetChar(Map* map, int x, int y);
+int mapRandomCharPos(Map* map, int* x, int* y, const char* chars);
