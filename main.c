@@ -14,13 +14,44 @@ int main() {
 	printf(CUR_INV);
 	setvbuf(stdout, NULL, _IOFBF, 4096);
 
-	bool running = showMenu() == 0;
+	int seed = 0;
+	bool running = true;
+	Map map;
+	Snake snake;
+	Game game;
+
 	while (running) {
-		Map map = initMap(30, 20);
-		Snake snake = initSnake(3, 10, 10);
-		Game game = initGame(&map, &snake);
-		startGame(&game, 0);
-		running = showDeathMenu() == 0;
+		int choice = showMenu(
+			"           W E L C O M E    T O\n"
+			"           S N A K E    G A M E",
+			(const char*[]){
+				"Start Game",
+				"Edit Seed",
+				"Show Leaderboard",
+				"Exit"}
+			, 4);
+
+		switch (choice) {
+			case 0:
+				map = initMap(30, 20);
+				snake = initSnake(3, 10, 10);
+				game = initGame(&map, &snake);
+				startGame(&game, seed);
+				running = showMenu(
+					"           G A M E   O V E R        ",
+				    (const char*[]){"Main Menu", "Exit"}, 2) == 0;
+				break;
+			case 1:
+				seed = inputNumber("Set seed (enter 0 for random)");
+				break;
+			case 2:
+				// showLeaderboard();
+				break;
+			case 3:
+				running = false;
+				break;
+		}
+
 	}
 
 	printf(CUR_VIS);

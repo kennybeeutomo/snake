@@ -25,8 +25,7 @@ void displayMap(Map* map) {
 		for (int x = 0; x < map->width; ++x) {
 			char ch = map->data[y][x];
 			switch (ch) {
-				case '#':
-				case '@':
+				case '#': case '@':
 					printf(GREENFG);
 					break;
 				case ' ':

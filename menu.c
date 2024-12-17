@@ -7,37 +7,37 @@
 #include "map.h"
 #include "utils.h"
 
-int showMenu() {
+int showMenu(const char* text, const char* choices[], int numChoices) {
     int choice = 0;
     while (1) {
 		printf(CLEARSCREEN);
 		printf(HOME);
         
         printf("===========================================\n");
-        printf("            W  E  L  C  O  M  E            \n");
-        printf("    T  O    S  N  A  K  E    G  A  M  E    \n");
+		puts(text);
         printf("===========================================\n");
-        
-        if (choice == 0) {
-            printf("  > Start Game\n");
-            printf("    Exit\n");
-        } else {
-            printf("    Start Game\n");
-            printf("  > Exit\n");
-        }
+
+		for (int c = 0; c < numChoices; ++c) {
+			if (choice == c) {
+				printf(" > ");
+			} else {
+				printf("   ");
+			}
+			puts(choices[c]);
+		}
 
         printf("============================================\n");
-        printf("Use 'w' or 's' keys to navigate.\n");
+        printf("Use 'w/k' or 's/j' keys to navigate.\n");
 		fflush(stdout);
 
 		switch (getch()) {
 			case 'k':
 			case 'w':
-				choice = mod(choice-1, 2);
+				choice = mod(choice-1, numChoices);
 				break;
 			case 'j':
 			case 's':
-				choice = mod(choice+1, 2);
+				choice = mod(choice+1, numChoices);
 				break;
 			case ' ':
 			case 13:
@@ -46,41 +46,21 @@ int showMenu() {
     }
 }
 
-int showDeathMenu() {
-    int choice = 0;
-    while (1) {
-		printf(CLEARSCREEN);
-		printf(HOME);
+int inputNumber(const char* text) {
+	printf(CLEARSCREEN);
+	printf(HOME);
+	printf(CUR_VIS);
 
-        printf("=============================================\n");
-        printf("            Y  O  U    D  I  E  D            \n");
-        printf("=============================================\n");
+	int number;
 
-        if (choice == 0) {
-            printf("  > Play Again\n");
-            printf("    Exit\n");
-        } else {
-            printf("    Play Again\n");
-            printf("  > Exit\n");
-        }
+	printf("===========================================\n");
+	printf("%s\n", text);
+	printf("===========================================\n");
+	printf("> ");
+	fflush(stdout);
+	scanf("%d", &number);
+	getchar();
 
-        printf("=============================================\n");
-        printf("Use 'w' or 's' keys to navigate.\n");
-		fflush(stdout);
-
-		switch (getch()) {
-			case 'k':
-			case 'w':
-				choice = mod(choice-1, 2);
-				break;
-			case 'j':
-			case 's':
-				choice = mod(choice+1, 2);
-				break;
-			case ' ':
-			case 13:
-				return choice;
-		}
-    }
+	printf(CUR_INV);
+	return number;
 }
-
