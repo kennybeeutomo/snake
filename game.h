@@ -4,6 +4,7 @@
 
 #include "map.h"
 #include "snake.h"
+#include "leaderboard.h"
 
 typedef struct {
 	Map* map;
@@ -28,3 +29,5 @@ void addFoods(Game* game, int quantity);
 void generateWalls(Game* game, int quantity, int length, int turnChance);
 
 void displayStats(Game* game);
+
+Record getRecord(Game* game);

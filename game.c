@@ -1,5 +1,6 @@
 #include "game.h"
 #include "ansicodes.h"
+#include "leaderboard.h"
 #include "map.h"
 #include "snake.h"
 #include "utils.h"
@@ -38,9 +39,10 @@ void runGame(Game* game) {
 
 	mapSnake(game);
 	generateWalls(game, 30, 8, 20);
+	addFoods(game, 5);
 
 	while (game->running) {
-		if (game->steps % 10 == 0) {
+		if (game->steps % 20 == 0) {
 			addFoods(game, 1);
 		}
 		displayMap(game->map);
@@ -94,6 +96,7 @@ void handleSnakeCollision(Game* game) {
 		case '*':
 			game->score++;
 			extendSnake(game->snake);
+			addFoods(game, 2);
 			break;
 		case 0: case '#': case ' ':
 			game->running = false;
@@ -118,7 +121,7 @@ void mapSnake(Game* game) {
 void addFoods(Game* game, int quantity) {
 	for (int q = 0; q < quantity; ++q) {
 		int x, y;
-		if (mapRandomCharPos(game->map, &x, &y, ".")) return;
+		if (mapRandomCharPos(game->map, &x, &y, ".", 1, " ")) continue;
 		mapSetChar(game->map, x, y, '*');
 	}
 }
@@ -126,7 +129,7 @@ void addFoods(Game* game, int quantity) {
 void generateWalls(Game* game, int quantity, int length, int turnChance) {
 	for (int q = 0; q < quantity; ++q) {
 		int x, y;
-		mapRandomCharPos(game->map, &x, &y, ".");
+		mapRandomCharPos(game->map, &x, &y, ".", 1, " ");
 		Direction direction = rand() % 4;
 
 		for (int l = 0; l < length; ++l) {
@@ -157,3 +160,10 @@ void displayStats(Game* game) {
 	fflush(stdout);
 }
 
+Record getRecord(Game* game) {
+	Record record = {0};
+	record.seed = game->seed;
+	record.score = game->score;
+	record.steps = game->steps;
+	return record;
+}

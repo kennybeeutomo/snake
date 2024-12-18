@@ -24,4 +24,6 @@
 #define CYANBG		"\033[46m"
 #define WHITEBG		"\033[47m"
 
+#define INVERSE		"\033[7m"
+
 #define RESET 		"\033[0m"

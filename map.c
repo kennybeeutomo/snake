@@ -82,14 +82,17 @@ char mapGetChar(Map* map, int x, int y) {
 	}
 }
 
-int mapRandomCharPos(Map* map, int* x, int* y, const char* chars) {
+char mapRandomCharPos(Map* map, int* x, int* y, const char* chars, int timeout, const char* excludeChars) {
 	int newX, newY, i = 0;
+	char ch;
 
 	do {
 		newX = rand() % map->width;
 		newY = rand() % map->height;
-		if (i++ >= map->width * map->height) return 1;
-	} while (strchr(chars, mapGetChar(map, newX, newY)) == NULL);
+		ch = mapGetChar(map, newX, newY);
+		if (strchr(excludeChars, ch) != NULL) i++;
+		if (i >= timeout) return ch;
+	} while (strchr(chars, ch) == NULL);
 
 	*x = newX;
 	*y = newY;

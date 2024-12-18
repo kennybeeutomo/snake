@@ -66,4 +66,5 @@ void printSnake(Snake* snake) {
 	for (int i = 0; i < snake->length; ++i) {
 		printf("%c", snake->segments[i].type);
 	}
+	puts("");
 }

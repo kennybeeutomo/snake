@@ -16,4 +16,4 @@ bool isInside(Map* map, int x, int y);
 int mapSetChar(Map* map, int x, int y, char ch);
 int mapReplaceChar(Map* map, int x, int y, char ch, const char* charList);
 char mapGetChar(Map* map, int x, int y);
-int mapRandomCharPos(Map* map, int* x, int* y, const char* chars);
+char mapRandomCharPos(Map* map, int* x, int* y, const char* chars, int timeout, const char* excludeChars);
