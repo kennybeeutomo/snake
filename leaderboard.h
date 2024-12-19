@@ -21,16 +21,26 @@ typedef struct {
 } Leaderboard;
 
 Leaderboard initLeaderboard();
+
+// File handling
 void writeLeaderboard(Leaderboard leaderboard);
 void loadLeaderboard(Leaderboard* leaderboard);
 void freeLeaderboard(Leaderboard* leaderboard);
+
+// Management
 void addRecord(Leaderboard* leaderboard, Record record);
+void removeRecord(Leaderboard* leaderboard, int index);
+
+// Sorting
 bool compareRecord(const Record* left, const Record* right);
 void swapRecord(Record* left, Record* right);
 void sortLeaderboard(Leaderboard* leaderboard);
+
+// Searching
+bool recordContains(Record* record, char search[MAX_NAME_LENGTH]);
+int searchNext(Leaderboard* leaderboard, char search[MAX_NAME_LENGTH], int from);
+int searchPrev(Leaderboard* leaderboard, char search[MAX_NAME_LENGTH], int from);
+
+// UI
 void printRecord(Record record);
-int searchRecordSeedNext(Leaderboard* leaderboard, unsigned seed, int from);
-int searchRecordSeedPrev(Leaderboard* leaderboard, unsigned seed, int from);
-int searchRecordNameNext(Leaderboard* leaderboard, char name[MAX_NAME_LENGTH], int from);
-int searchRecordNamePrev(Leaderboard* leaderboard, char name[MAX_NAME_LENGTH], int from);
 void showLeaderboard(Leaderboard* leaderboard, int height);

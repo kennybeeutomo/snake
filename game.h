@@ -29,5 +29,6 @@ void addFoods(Game* game, int quantity);
 void generateWalls(Game* game, int quantity, int length, int turnChance);
 
 void displayStats(Game* game);
+void displayControls();
 
 Record getRecord(Game* game);

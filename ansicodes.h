@@ -3,6 +3,11 @@
 #define CLEARSCREEN "\033[2J"
 #define HOME		"\033[H"
 
+#define UP			"\033[1A"
+#define DOWN		"\033[1B"
+
+#define ERASE_DOWN	"\033[0J"
+
 #define CUR_INV		"\033[?25l"
 #define CUR_VIS		"\033[?25h"
 

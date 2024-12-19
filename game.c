@@ -42,7 +42,7 @@ void runGame(Game* game) {
 	addFoods(game, 5);
 
 	while (game->running) {
-		if (game->steps % 20 == 0) {
+		if (game->steps % 10 == 0) {
 			addFoods(game, 1);
 		}
 		displayMap(game->map);
@@ -86,6 +86,9 @@ void getInput(Game* game) {
 				break;
 			default:
 				invalid = true;
+				displayControls();
+				fflush(stdout);
+				printf(UP UP UP ERASE_DOWN);
 				break;
 		}
 	} while (invalid);
@@ -96,7 +99,7 @@ void handleSnakeCollision(Game* game) {
 		case '*':
 			game->score++;
 			extendSnake(game->snake);
-			addFoods(game, 2);
+			addFoods(game, 1);
 			break;
 		case 0: case '#': case ' ':
 			game->running = false;
@@ -157,7 +160,16 @@ void displayStats(Game* game) {
 	printf("Seed  : %u\n", game->seed);
 	printf("Snake : %d ", game->snake->length);
 	printSnake(game->snake);
+	printf("\n");
 	fflush(stdout);
+}
+
+void displayControls() {
+	printf(
+		"Controls:\n"
+		"wasd or hjkl : move snake\n"
+		"q            : quit\n"
+	);
 }
 
 Record getRecord(Game* game) {

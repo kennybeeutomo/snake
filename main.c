@@ -41,12 +41,14 @@ int showWelcome() {
 
 int showGameOver() {
 	char gameover[256];
+	float efficiency = (float)game.score / game.steps * 100;
 	sprintf(gameover,
 		 "           G A M E   O V E R          \n\n"
-		 "      Seed  : %d                       \n"
-		 "      Score : %d                       \n"
-		 "      Steps : %d                       \n",
-		 game.seed, game.score, game.steps);
+		 "      Seed       : %d                       \n"
+		 "      Score      : %d                       \n"
+		 "      Steps      : %d                       \n"
+		 "      Efficiency : %.2f%%                   \n",
+		 game.seed, game.score, game.steps, efficiency);
 
 	return showMenu(gameover, 4, (const char*[]){
 		"Try Again",
