@@ -1,4 +1,4 @@
-# Final Project Algorithm and Programming
+# Final Project Algorithm and Programming Lab
 ## Snake Game
 
 #### Kelompok
