@@ -141,12 +141,12 @@ int searchPrev(Leaderboard* leaderboard, char search[MAX_NAME_LENGTH], int from)
 
 // UI
 void showLeaderboardControls() {
-	showControls(
+	printf(
 		"w/k = move up                 s/j = move down      d/u = move faster\n"
 		"f   = search                  ESC = clear search\n"
 		"n   = search next             N = search previous\n"
 		"r   = remove selected record  q = quit\n"
-		, 4);
+	);
 }
 
 void printRecord(Record record) {
