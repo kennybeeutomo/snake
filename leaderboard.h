@@ -42,5 +42,6 @@ int searchNext(Leaderboard* leaderboard, char search[MAX_NAME_LENGTH], int from)
 int searchPrev(Leaderboard* leaderboard, char search[MAX_NAME_LENGTH], int from);
 
 // UI
+void showLeaderboardControls();
 void printRecord(Record record);
 void showLeaderboard(Leaderboard* leaderboard, int height);

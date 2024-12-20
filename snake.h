@@ -1,5 +1,9 @@
 #pragma once
 
+#include "chars.h"
+
+#define SNAKE_CAPACITY 1024
+
 typedef enum {right, down, left, up} Direction;
 
 typedef struct Segment Segment;

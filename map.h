@@ -1,6 +1,7 @@
 #pragma once
 
 #include <stdbool.h>
+#include "chars.h"
 
 typedef struct {
 	int width;

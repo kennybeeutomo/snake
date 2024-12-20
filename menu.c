@@ -1,6 +1,7 @@
 #include <conio.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 #include "menu.h"
 #include "ansicodes.h"
@@ -18,28 +19,39 @@ int showMenu(const char* text, int numChoices, const char* choices[]) {
         printf("===========================================\n");
 
 		for (int c = 0; c < numChoices; ++c) {
-			if (choice == c) printf(INVERSE);
+			if (choice == c) printf(INVERSE CYANFG);
 			printf("   %s   \n", choices[c]);
 			printf(RESET);
 		}
 
         printf("============================================\n");
-        printf("w/k = move up, s/j = move down\n");
 		fflush(stdout);
 
-		switch (getch()) {
-			case 'k':
-			case 'w':
-				choice = mod(choice-1, numChoices);
-				break;
-			case 'j':
-			case 's':
-				choice = mod(choice+1, numChoices);
-				break;
-			case ' ':
-			case 13:
-				return choice;
-		}
+		bool invalid;
+		do {
+			invalid = false;
+			switch (getch()) {
+				case 'k':
+				case 'w':
+					choice = mod(choice-1, numChoices);
+					break;
+				case 'j':
+				case 's':
+					choice = mod(choice+1, numChoices);
+					break;
+				case ' ':
+				case 13:
+					return choice;
+				default:
+					invalid = true;
+					showControls(
+						"w/k = move up\n"
+						"s/j = move down\n"
+						"SPACE/ENTER = confirm\n"
+						, 3);
+					break;
+			}
+		} while (invalid);
     }
 }
 
@@ -95,4 +107,15 @@ void showText(const char* text) {
 	puts("Press any key to continue...");
 	fflush(stdout);
 	getch();
+}
+
+void showControls(const char* text, int lines) {
+	puts(text);
+	fflush(stdout);
+
+	for (int i = 0; i < lines + 1; ++i) {
+		printf(UP);
+	}
+
+	printf(ERASE_DOWN);
 }

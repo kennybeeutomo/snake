@@ -17,7 +17,7 @@ void initGame(Game* game, Map* map, Snake* snake, unsigned seed) {
 	game->score = 0;
 	game->steps = 0;
 	game->lastAction = 0;
-	game->running = false;
+	game->running = 0;
 	game->map = map;
 	game->snake = snake;
 	strcpy(game->saveName, AUTOSAVE_NAME);
@@ -33,7 +33,7 @@ void generateGame(Game* game) {
 void setGameSeed(Game* game, unsigned seed) {
 	if (seed == 0) {
 		srand(time(NULL));
-		seed = (rand() * rand()) % 1000000;
+		seed = (rand() * rand()) % powInt(10, SEED_LENGTH);
 	}
 	srand(seed);
 	game->seed = seed;
@@ -48,8 +48,8 @@ void runGame(Game* game, bool isLoaded) {
 	}
 	setvbuf(game->save, NULL, _IOFBF, 4096);
 
-	game->running = true;
-	while (game->running) {
+	game->running = 1;
+	while (game->running > 0) {
 		gameTick(game);
 		displayMap(game->map);
 		displayStats(game);
@@ -75,23 +75,6 @@ void endGame(Game* game) {
 	fflush(stdout);
 }
 
-void pause(Game* game) {
-	int choice = showMenu(
-		"        GAME PAUSED",
-		2, (const char*[]){
-			"Resume",
-			"Quit",
-		});
-
-	switch (choice) {
-		case 0: // Resume
-			break;
-		case 1: // Quit
-			game->running = false;
-			break;
-	}
-}
-
 void loadSeed(Game* game, FILE* file) {
 	unsigned seed;
 	fread(&seed, sizeof(unsigned), 1, file);
@@ -100,8 +83,8 @@ void loadSeed(Game* game, FILE* file) {
 
 void traceInput(Game* game, FILE* file, bool slowMode) {
 	char keystroke;
-	game->running = true;
-	while (game->running && fread(&keystroke, sizeof(char), 1, file) != 0) {
+	game->running = 1;
+	while (game->running > 0 && fread(&keystroke, sizeof(char), 1, file) != 0) {
 		gameTick(game);
 		if (slowMode) {
 			displayMap(game->map);
@@ -133,14 +116,15 @@ int parseInput(Game* game, char key) {
 			retVal = moveSnakeOnMap(game, right);
 			isAnAction = true;
 			break;
-		case 'q': case 'p':
-			pause(game);
+		case 'Q':
+			game->running = -1;
+			break;
+		case 'q':
+			game->running = 0;
 			break;
 		default:
 			retVal = 1;
 			displayControls();
-			fflush(stdout);
-			printf(UP UP UP ERASE_DOWN);
 			break;
 	}
 
@@ -192,13 +176,13 @@ int loadGameUI(Game* game) {
 
 void handleSnakeCollision(Game* game) {
 	switch (mapGetChar(game->map, game->snake->x, game->snake->y)) {
-		case '*':
+		case FOOD:
 			game->score++;
 			extendSnake(game->snake);
 			addFoods(game, 1);
 			break;
-		case 0: case '#': case ' ':
-			game->running = false;
+		case 0: case TAIL: case WALL:
+			game->running = 0;
 			freopen(game->saveName, "wb", game->save);
 			fwrite(&game->seed, sizeof(unsigned), 1, game->save);
 			fflush(game->save);
@@ -231,7 +215,7 @@ void addFoods(Game* game, int quantity) {
 	for (int q = 0; q < quantity; ++q) {
 		int x, y;
 		if (mapRandomCharPos(game->map, &x, &y, ".", 1, " ")) continue;
-		mapSetChar(game->map, x, y, '*');
+		mapSetChar(game->map, x, y, FOOD);
 	}
 }
 
@@ -242,7 +226,7 @@ void generateWalls(Game* game, int quantity, int length, int turnChance) {
 		Direction direction = rand() % 4;
 
 		for (int l = 0; l < length; ++l) {
-			mapReplaceChar(game->map, x, y, ' ', ".");
+			mapReplaceChar(game->map, x, y, WALL, ".");
 
 			switch (direction) {
 				case right: x++; break;
@@ -271,10 +255,12 @@ void displayStats(Game* game) {
 }
 
 void displayControls() {
-	printf(
+	showControls(
 		"Controls:\n"
 		"wasd or hjkl : move snake\n"
 		"q            : quit\n"
+		"Q            : hard quit\n",
+		4
 	);
 }
 

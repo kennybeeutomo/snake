@@ -10,7 +10,7 @@ Map initMap(int width, int height) {
 
 	for (int i = 0; i < height; ++i) {
 		data[i] = (char*)malloc(width * sizeof(char));
-		memset(data[i], '.', width * sizeof(char));
+		memset(data[i], EMPTY, width * sizeof(char));
 	}
 
 	Map map = {width, height, data};
@@ -25,13 +25,13 @@ void displayMap(Map* map) {
 		for (int x = 0; x < map->width; ++x) {
 			char ch = map->data[y][x];
 			switch (ch) {
-				case '#': case '@':
+				case TAIL: case HEAD:
 					printf(GREENFG);
 					break;
-				case ' ':
+				case WALL:
 					printf(REDBG);
 					break;
-				case '*':
+				case FOOD:
 					printf(YELLOWFG);
 					break;
 			}

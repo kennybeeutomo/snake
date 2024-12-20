@@ -6,7 +6,7 @@
 Snake initSnake(int length, int x, int y) {
 	if (length <= 1) length = 2;
 
-	int capacity = 1024;
+	int capacity = SNAKE_CAPACITY;
 	Segment* segments = (Segment*)malloc(capacity * sizeof(Segment));
 
 	int i = length-1;

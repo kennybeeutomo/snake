@@ -29,11 +29,11 @@ int showWelcome() {
 	return showMenu(
 		"                               \n"
 		"                               \n"
-		"           W E L C O M E    T O\n"
-		"           S N A K E    G A M E\n"
+		"           W E L C O M E    T O\n" CYANFG
+		"           S N A K E    G A M E\n" RESET
 		"                               \n",
 		7, (const char*[]){
-			"Start Game",
+			"New Game",
 			"Continue",
 			"Load Game",
 			"Change Seed",
@@ -128,6 +128,11 @@ int main() {
 
 					runGame(&game, choice != 0);
 					gameRunning = false;
+
+					if (game.running == -1) { // hard quit
+						running = false;
+						break;
+					}
 
 					lastSeed = game.seed;
 

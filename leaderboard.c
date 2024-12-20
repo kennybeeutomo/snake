@@ -1,5 +1,6 @@
 #include "leaderboard.h"
 #include "ansicodes.h"
+#include "game.h"
 #include "menu.h"
 #include "utils.h"
 
@@ -112,7 +113,7 @@ void sortLeaderboard(Leaderboard* leaderboard) {
 
 // Searching
 bool recordContains(Record* record, char search[MAX_NAME_LENGTH]) {
-	char seedLeaderboard[7] = {0};
+	char seedLeaderboard[SEED_LENGTH+1] = {0};
 	itoa(record->seed, seedLeaderboard, 10);
 	if (!strcmp(seedLeaderboard, search) || strstr(record->name, search)) {
 		return true;
@@ -139,6 +140,15 @@ int searchPrev(Leaderboard* leaderboard, char search[MAX_NAME_LENGTH], int from)
 }
 
 // UI
+void showLeaderboardControls() {
+	showControls(
+		"w/k = move up                 s/j = move down      d/u = move faster\n"
+		"f   = search                  ESC = clear search\n"
+		"n   = search next             N = search previous\n"
+		"r   = remove selected record  q = quit\n"
+		, 4);
+}
+
 void printRecord(Record record) {
 	printf("%-8u %-16s %-5d %-5d %9.2f%%\n",
 	       record.seed, record.name, record.score, record.steps,
@@ -190,12 +200,7 @@ void showLeaderboard(Leaderboard* leaderboard, int height) {
 		}
 
 		printf("=================================================================\n");
-		printf(
-			"w/k = move up                 s/j = move down      d/u = move faster\n"
-			"f   = search                  ESC = clear search\n"
-			"n   = search next             N = search previous\n"
-			"r   = remove selected record  q = quit\n"
-		);
+		showLeaderboardControls();
 
 		if (search[0] != 0) {
 			printf("Searching: %s\n", search);

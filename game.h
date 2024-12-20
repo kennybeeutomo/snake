@@ -9,11 +9,12 @@
 
 #define AUTOSAVE_NAME "save"
 #define SAVENAME_SIZE 128
+#define SEED_LENGTH 6
 
 typedef struct {
 	Map* map;
 	Snake* snake;
-	bool running;
+	int running;
 	int score;
 	int steps;
 	unsigned seed;
@@ -27,8 +28,6 @@ void generateGame(Game* game);
 void setGameSeed(Game* game, unsigned seed);
 void runGame(Game* game, bool isLoaded);
 void endGame(Game* game);
-
-void pause(Game* game);
 
 void loadSeed(Game* game, FILE* file);
 void traceInput(Game* game, FILE* file, bool slowMode);
