@@ -2,6 +2,7 @@
 #include "ansicodes.h"
 #include "leaderboard.h"
 #include "map.h"
+#include "menu.h"
 #include "snake.h"
 #include "utils.h"
 
@@ -12,45 +13,55 @@
 #include <time.h>
 #include <conio.h>
 
-Game initGame(Map* map, Snake* snake) {
-	Game game;
-	game.map = map;
-	game.snake = snake;
-	game.running = false;
-	return game;
+void initGame(Game* game, Map* map, Snake* snake, unsigned seed) {
+	game->score = 0;
+	game->steps = 0;
+	game->lastAction = 0;
+	game->running = false;
+	game->map = map;
+	game->snake = snake;
+	strcpy(game->saveName, AUTOSAVE_NAME);
+	setGameSeed(game, seed);
 }
 
-void startGame(Game* game, unsigned seed) {
+void generateGame(Game* game) {
+	mapSnake(game);
+	generateWalls(game, 30, 8, 20);
+	addFoods(game, 5);
+}
+
+void setGameSeed(Game* game, unsigned seed) {
 	if (seed == 0) {
 		srand(time(NULL));
 		seed = (rand() * rand()) % 1000000;
 	}
 	srand(seed);
-
 	game->seed = seed;
-	game->score = 0;
-	game->steps = 0;
-
-	runGame(game);
 }
 
-void runGame(Game* game) {
+void runGame(Game* game, bool isLoaded) {
+	if (isLoaded) {
+		game->save = fopen(game->saveName, "ab");
+	} else {
+		game->save = fopen(game->saveName, "wb");
+		fwrite(&game->seed, sizeof(game->seed), 1, game->save);
+	}
+	setvbuf(game->save, NULL, _IOFBF, 4096);
+
 	game->running = true;
-
-	mapSnake(game);
-	generateWalls(game, 30, 8, 20);
-	addFoods(game, 5);
-
 	while (game->running) {
-		if (game->steps % 10 == 0) {
-			addFoods(game, 1);
-		}
+		gameTick(game);
 		displayMap(game->map);
 		displayStats(game);
 		getInput(game);
+		if (game->lastAction != 0 && game->running) {
+			fwrite(&game->lastAction, sizeof(char), 1, game->save);
+		}
 		mapSnake(game);
-		game->steps++;
 	}
+
+	fflush(game->save);
+	fclose(game->save);
 
 	endGame(game);
 }
@@ -64,34 +75,119 @@ void endGame(Game* game) {
 	fflush(stdout);
 }
 
-void getInput(Game* game) {
-	bool invalid;
-	do {
-		invalid = false;
-		switch (getch()) {
-			case 'h': case 'a':
-				invalid = moveSnakeOnMap(game, left);
-				break;
-			case 'j': case 's':
-				invalid = moveSnakeOnMap(game, down);
-				break;
-			case 'k': case 'w':
-				invalid = moveSnakeOnMap(game, up);
-				break;
-			case 'l': case 'd':
-				invalid = moveSnakeOnMap(game, right);
-				break;
-			case 'q':
-				game->running = false;
-				break;
-			default:
-				invalid = true;
-				displayControls();
-				fflush(stdout);
-				printf(UP UP UP ERASE_DOWN);
-				break;
+void pause(Game* game) {
+	int choice = showMenu(
+		"        GAME PAUSED",
+		2, (const char*[]){
+			"Resume",
+			"Quit",
+		});
+
+	switch (choice) {
+		case 0: // Resume
+			break;
+		case 1: // Quit
+			game->running = false;
+			break;
+	}
+}
+
+void loadSeed(Game* game, FILE* file) {
+	unsigned seed;
+	fread(&seed, sizeof(unsigned), 1, file);
+	setGameSeed(game, seed);
+}
+
+void traceInput(Game* game, FILE* file, bool slowMode) {
+	char keystroke;
+	game->running = true;
+	while (game->running && fread(&keystroke, sizeof(char), 1, file) != 0) {
+		gameTick(game);
+		if (slowMode) {
+			displayMap(game->map);
+			displayStats(game);
+			getch();
 		}
+		parseInput(game, keystroke);
+		mapSnake(game);
+	}
+}
+
+int parseInput(Game* game, char key) {
+	int retVal = 0;
+	bool isAnAction = false;
+	switch (key) {
+		case 'h': case 'a':
+			retVal = moveSnakeOnMap(game, left);
+			isAnAction = true;
+			break;
+		case 'j': case 's':
+			retVal = moveSnakeOnMap(game, down);
+			isAnAction = true;
+			break;
+		case 'k': case 'w':
+			retVal = moveSnakeOnMap(game, up);
+			isAnAction = true;
+			break;
+		case 'l': case 'd':
+			retVal = moveSnakeOnMap(game, right);
+			isAnAction = true;
+			break;
+		case 'q': case 'p':
+			pause(game);
+			break;
+		default:
+			retVal = 1;
+			displayControls();
+			fflush(stdout);
+			printf(UP UP UP ERASE_DOWN);
+			break;
+	}
+
+	if (isAnAction) {
+		game->steps++;
+		game->lastAction = key;
+	} else {
+		game->lastAction = 0;
+	}
+
+	return retVal;
+}
+
+void getInput(Game* game) {
+	bool invalid = false;
+	char key;
+	do {
+		key = getch();
+		invalid = parseInput(game, key);
 	} while (invalid);
+}
+
+int loadGame(Game* game, const char* fileName, bool slowMode) {
+	FILE* file = fopen(fileName, "rb");
+	if (file == NULL) {
+		showText("        SAVE FILE DOESN'T EXIST");
+		return 1;
+	}
+
+	if (strcmp(fileName, AUTOSAVE_NAME) != 0) {
+		strcpy(game->saveName, fileName);
+	}
+
+	loadSeed(game, file);
+	generateGame(game);
+	traceInput(game, file, slowMode);
+
+	fclose(file);
+	return 0;
+}
+
+int loadGameUI(Game* game) {
+	char fileName[SAVENAME_SIZE];
+	inputString(
+		"        INPUT SAVE FILE TO LOAD",
+		fileName, 1);
+	return loadGame(game, fileName, false);
 }
 
 void handleSnakeCollision(Game* game) {
@@ -103,6 +199,16 @@ void handleSnakeCollision(Game* game) {
 			break;
 		case 0: case '#': case ' ':
 			game->running = false;
+			freopen(game->saveName, "wb", game->save);
+			fwrite(&game->seed, sizeof(unsigned), 1, game->save);
+			fflush(game->save);
+			break;
+	}
+}
+
+void gameTick(Game* game) {
+	if (game->steps % 10 == 0) {
+		addFoods(game, 1);
 	}
 }
 

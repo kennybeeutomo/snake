@@ -1,3 +1,4 @@
+#include <stdbool.h>
 #include <stdio.h>
 #include <conio.h>
 
@@ -31,12 +32,20 @@ int showWelcome() {
 		"           W E L C O M E    T O\n"
 		"           S N A K E    G A M E\n"
 		"                               \n",
-		5, (const char*[]){
+		7, (const char*[]){
 			"Start Game",
+			"Continue",
+			"Load Game",
 			"Change Seed",
 			"Leaderboard",
 			"Credits",
 			"Quit"});
+}
+
+void init() {
+	map = initMap(MAP_WIDTH, MAP_HEIGHT);
+	snake = initSnake(SNAKE_LENGTH, SNAKE_X, SNAKE_Y);
+	initGame(&game, &map, &snake, seed);
 }
 
 int showGameOver() {
@@ -89,15 +98,36 @@ int main() {
 
 	while (running) {
 		int choice = showWelcome();
+		int option;
+		bool gameRunning;
 
 		switch (choice) {
-			case 0:; // Start Game
-				int option;
-				do {
-					map = initMap(MAP_WIDTH, MAP_HEIGHT);
-					snake = initSnake(SNAKE_LENGTH, SNAKE_X, SNAKE_Y);
-					game = initGame(&map, &snake);
-					startGame(&game, seed);
+			case 2: // Load Game
+				init();
+				if (loadGameUI(&game) == 1) {
+					break;
+				}
+			case 0: case 1: // Start Game, Continue
+				gameRunning = true;
+				while (gameRunning) {
+					init();
+					if (choice == 0) {
+						generateGame(&game);
+					}
+
+					if (choice == 1) {
+						if (loadGame(&game, AUTOSAVE_NAME, false) == 1) {
+							gameRunning = false;
+							continue;
+						}
+					}
+
+					if (choice == 2) {
+						loadGame(&game, game.saveName, false);
+					}
+
+					runGame(&game, choice != 0);
+					gameRunning = false;
 
 					lastSeed = game.seed;
 
@@ -107,6 +137,7 @@ int main() {
 
 					if (option == 0) { // Try Again
 						seed = lastSeed;
+						gameRunning = true;
 					}
 
 					if (option == 1) { // Main Menu
@@ -124,27 +155,27 @@ int main() {
 					if (option == 3) { // Quit
 						running = false;
 					}
-				} while (option == 0);
+				}
 
 				break;
-			case 1:; // Change Seed
+			case 3:; // Change Seed
 				unsigned newSeed = inputSeed();
 				if (newSeed != -1u) {
 					seed = newSeed;
 				}
 
 				break;
-			case 2: // Leaderboard
+			case 4: // Leaderboard
 				if (!leaderboard.isSorted) {
 					sortLeaderboard(&leaderboard);
 				}
 
 				showLeaderboard(&leaderboard, LEADERBOARD_HEIGHT);
 				break;
-			case 3: // Credits
+			case 5: // Credits
 				showCredits();
 				break;
-			case 4: // Quit
+			case 6: // Quit
 				running = false;
 				break;
 		}
