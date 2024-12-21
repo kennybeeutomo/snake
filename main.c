@@ -81,11 +81,11 @@ unsigned inputSeed() {
 
 void showCredits() {
 	showText(
-		"              CREDITS               \n"
-		"                                    \n"
-		"  - Kenny Bee Utomo                 \n"
-		"  - Wesley Sumedha Deano            \n"
-		"  - Raden Alexander Christianace    \n"
+		"              CREDITS                         \n"
+		"                                              \n"
+		"  - Kenny Bee Utomo (2802429516)              \n"
+		"  - Wesley Sumedha Deano (2802401846)         \n"
+		"  - Raden Alexander Christianace (2802439731) \n"
 	);
 }
 

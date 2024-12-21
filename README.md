@@ -2,9 +2,9 @@
 ## Snake Game
 
 #### Kelompok
-- Kenny Bee Utomo
-- Wesley Sumedha Deano
-- Raden Alexander Christianace
+- Kenny Bee Utomo (2802429516)
+- Wesley Sumedha Deano (2802401846)
+- Raden Alexander Christianace (2802439731)
 
 #### Compile
 ```
